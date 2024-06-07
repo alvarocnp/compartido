@@ -78,7 +78,7 @@ app.post("/login", async (req, res) => {
 
         const token = jwt.sign({ userId: user._id, }, secretKey)
 
-        res.status(200).json({ token });
+        res.status(200).json({ token,userId: user._id });
     } catch (error) {
         console.log("Login failed", error);
         res.status(500).json({ message: "Login failed " });
@@ -89,11 +89,9 @@ app.post("/tasks/:userId", async (req, res) => {
     try {
         const userId = req.params.userId;
         const { title } = req.body;
-        const list=[];
         const newTask = new Task({
             title,
             date: moment().format("DD/MM/YYYY"),
-            list,
         });
 
         await newTask.save();
@@ -147,23 +145,7 @@ app.patch("/tasks/:taskId/complete", async (req, res) => {
         res.status(500).json({ error: "Mal tete" })
     }
 })
-/*
-app.get("/tasks/complete/:date", async (req, res) => {
-    try {
-        const date = req.params.date;
-        const completedTask = await Task.find({
-            status: "completed",
-            createdAt: {
-                $gte: new Date(`${date}T00:00:00.000Z`),
-                $lt: new Date(`${date}T23:59:59.999Z`),
-            }
-        }).exec();
 
-        res.status(200).json({ completedTask });
-    } catch (error) {
-        res.status(500).json({ error: "Algo mal bebé si" });
-    }
-});*/
 app.get("/tasks/complete/:date/:userId", async (req, res) => {
     try {
         const date = req.params.date;
@@ -172,6 +154,30 @@ app.get("/tasks/complete/:date/:userId", async (req, res) => {
             path: 'task',
             match: {
                 status: "completed",
+                createdAt: {
+                    $gte: new Date(`${date}T00:00:00.000Z`),
+                    $lt: new Date(`${date}T23:59:59.999Z`),
+                }
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+        res.status(200).json({ completedTask: user.task });
+    } catch (error) {
+        res.status(500).json({ error: "Algo mal" });
+    }
+});
+// filtra por fecha del dia de hoy 
+app.get("/tasks/:date/:userId", async (req, res) => {
+    try {
+        const date = req.params.date;
+        const userId = req.params.userId;
+        const user = await User.findById(userId).populate({
+            path: 'task',
+            match: {
                 createdAt: {
                     $gte: new Date(`${date}T00:00:00.000Z`),
                     $lt: new Date(`${date}T23:59:59.999Z`),
@@ -206,4 +212,34 @@ app.get("/task/count", async (req, res) => {
         res.status(500).json({ error: "Algo mal" })
     }
 })
+
+app.post("/users/:userId/lists/:listId/tasks", async (req, res) => {
+    try {
+      const { userId, listId } = req.params;
+      const { title, description, completed } = req.body;
+  
+      // Crear una nueva tarea
+      const newTask = new Task({ title, description, completed });
+      await newTask.save();
+  
+      // Buscar el usuario y la lista específica
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+  
+      const list = user.lists.id(listId);
+      if (!list) {
+        return res.status(404).json({ error: "Lista no encontrada" });
+      }
+  
+      // Agregar la tarea a la lista
+      list.tasks.push(newTask._id);
+      await user.save();
+  
+      res.status(201).json(newTask);
+    } catch (error) {
+      res.status(500).json({ error: "Algo salió mal" });
+    }
+  });
 

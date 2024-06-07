@@ -6,9 +6,8 @@ import axios from "axios";
 import { useRouter } from 'expo-router';
 import  AsyncStorage from '@react-native-async-storage/async-storage'
 
-
-
 const login = () => {
+
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -17,9 +16,9 @@ const login = () => {
         const checkLoginStatus = async () => {
             try {
                 const token = await AsyncStorage.getItem("authToken");
-                
+                const userId = await AsyncStorage.getItem("userId");
                 if (token ) {
-                    router.replace("/(tabs)/home");
+                    router.replace("/(tabs)/home",{userId});
                 }
             } catch (error) {
                 console.log(error);
@@ -29,14 +28,16 @@ const login = () => {
     }, [])
 
     const handleLogin = async () => {
+        
         const user = {
             email: email,
             password: password,
         };
-        axios.post("http://192.168.1.159:3000/login", user).then((response) => {
+        axios.post("http://192.168.1.159:3000/api/login", user).then((response) => {
             const token = response.data.token;
+            const userId=response.data.userId;
             AsyncStorage.setItem("authToken", token);
-        
+            AsyncStorage.setItem("userId", userId);
             router.replace("(tabs)/home");
         })
     };

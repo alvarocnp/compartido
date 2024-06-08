@@ -100,9 +100,7 @@ const index = () => {
             id: data.item._id,
             title: data.item.title,
           },
-         
         });
-        closeRow();
       }}
     >
       <View style={styles.viewTask}>
@@ -116,10 +114,7 @@ const index = () => {
     <View style={styles.hiddenContainer}>
       <Pressable
         style={[styles.hiddenButton, styles.deleteButton]}
-        onPress={() => {
-          deleteRow(rowMap, data.item._id)
-          closeRow(rowMap, data.item._id)
-        }}
+        onPress={() => deleteRow(rowMap, data.item._id)}
       >
         <AntDesign name="delete" size={24} color="black" />
       </Pressable>

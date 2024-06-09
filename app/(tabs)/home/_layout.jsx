@@ -7,7 +7,18 @@ export default function Layout() {
     return (
         <>
         <Stack >
-            <Stack.Screen name="index" options={{title:"Taskify"}}  />
+        <Stack.Screen
+                name="index"
+                options={{
+                    title: "Taskify",
+                    headerStyle: {
+                        height: 60, // Cambia esta altura según sea necesario
+                    },
+                    headerTitleStyle: {
+                        alignSelf: 'center', // Centra el título si es necesario
+                    },
+                }}
+            />
         </Stack>
         <ModalPortal/>
         </>

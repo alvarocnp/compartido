@@ -25,7 +25,7 @@ const index = () => {
       const fetchTaskData = async () => {
         try {
           const userId= await AsyncStorage.getItem('userId');
-          const response = await axios.get(`http://192.168.1.159:3000/api/task/count/${userId}`);
+          const response = await axios.get(`http://127.0.0.1:3000/api/task/count/${userId}`);
           const { totalCompletedTask, totalPendingTask } = response.data;
           setCompletedTasks(totalCompletedTask);
           setPendingTasks(totalPendingTask);
@@ -47,7 +47,7 @@ const index = () => {
       setCompletedTasks(totalCompletedTask);
       setPendingTasks(totalPendingTask);
 
-    } catch (error) {
+    } catch (error) {-
       console.log("error", error)
     }
   }

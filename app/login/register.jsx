@@ -18,7 +18,7 @@ const register = () => {
             email:email,
             password:password
         }
-        axios.post("http://192.168.1.159:3000/api/register",user).then((response) =>{
+        axios.post("http://127.0.0.1:3000/api/register",user).then((response) =>{
             console.log(response);
             Alert.alert("Registration successfull","Your register has been completed")
             setEmail("");

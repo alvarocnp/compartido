@@ -1,14 +1,4 @@
-<<<<<<< HEAD
-
-const mongoose =require("mongoose");
-const todoSchema=mongoose.Schema({
-    title:{
-        type:String,
-        required:true,
-    },
-=======
 const mongoose = require("mongoose");
->>>>>>> 7e824f4fc507f604a945878205e0500c3292e60a
 
 const taskSchema = new mongoose.Schema({
     title: {
@@ -34,11 +24,6 @@ const taskSchema = new mongoose.Schema({
     taskList: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "TaskList",
-        required: true,
-    },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
         required: true,
     },
 });

@@ -69,8 +69,25 @@ app.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
+<<<<<<< HEAD:api/index.js
     if (!user) {
       return res.status(401).json({ message: "Invalid email" });
+=======
+        if (!user) {
+            return res.status(401).json({ message: "Invalid email" })
+        }
+
+        if (user.password !== password) {
+            return res.status(401).json({ message: "Invalid password" })
+        }
+
+        const token = jwt.sign({ userId: user._id, }, secretKey)
+
+        res.status(200).json({ token,userId: user._id });
+    } catch (error) {
+        console.log("Login failed", error);
+        res.status(500).json({ message: "Login failed " });
+>>>>>>> 7e824f4fc507f604a945878205e0500c3292e60a:_mala/index.js
     }
 
     if (user.password !== password) {
@@ -87,6 +104,7 @@ app.post("/login", async (req, res) => {
 });
 
 app.post("/tasks/:userId", async (req, res) => {
+<<<<<<< HEAD:api/index.js
   try {
     const userId = req.params.userId;
     const { title } = req.body;
@@ -94,6 +112,15 @@ app.post("/tasks/:userId", async (req, res) => {
       title,
       date: moment().format("DD/MM/YYYY"),
     });
+=======
+    try {
+        const userId = req.params.userId;
+        const { title } = req.body;
+        const newTask = new Task({
+            title,
+            date: moment().format("DD/MM/YYYY"),
+        });
+>>>>>>> 7e824f4fc507f604a945878205e0500c3292e60a:_mala/index.js
 
     await newTask.save();
     const user = await User.findById(userId);
@@ -134,6 +161,7 @@ app.patch("/tasks/:taskId/complete", async (req, res) => {
   try {
     const taskId = req.params.taskId;
 
+<<<<<<< HEAD:api/index.js
     const updatedTask = await Task.findByIdAndUpdate(
       taskId,
       {
@@ -143,11 +171,71 @@ app.patch("/tasks/:taskId/complete", async (req, res) => {
     );
     if (!updatedTask) {
       res.status(404).json({ error: "Task not found tete" });
+=======
+        const updatedTask = await Task.findByIdAndUpdate(taskId, {
+            status: "completed",
+        }, { new: true });
+        if (!updatedTask) {
+            res.status(404).json({ error: "Task not found tete" })
+        }
+        res.status(200).json({ error: "Task completed", task: updatedTask })
+    } catch (error) {
+        res.status(500).json({ error: "Mal tete" })
+    }
+})
+
+app.get("/tasks/complete/:date/:userId", async (req, res) => {
+    try {
+        const date = req.params.date;
+        const userId = req.params.userId;
+        const user = await User.findById(userId).populate({
+            path: 'task',
+            match: {
+                status: "completed",
+                createdAt: {
+                    $gte: new Date(`${date}T00:00:00.000Z`),
+                    $lt: new Date(`${date}T23:59:59.999Z`),
+                }
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+        res.status(200).json({ completedTask: user.task });
+    } catch (error) {
+        res.status(500).json({ error: "Algo mal" });
+>>>>>>> 7e824f4fc507f604a945878205e0500c3292e60a:_mala/index.js
     }
     res.status(200).json({ error: "Task completed", task: updatedTask });
   } catch (error) {
     res.status(500).json({ error: "Mal tete" });
   }
+});
+// filtra por fecha del dia de hoy 
+app.get("/tasks/:date/:userId", async (req, res) => {
+    try {
+        const date = req.params.date;
+        const userId = req.params.userId;
+        const user = await User.findById(userId).populate({
+            path: 'task',
+            match: {
+                createdAt: {
+                    $gte: new Date(`${date}T00:00:00.000Z`),
+                    $lt: new Date(`${date}T23:59:59.999Z`),
+                }
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+        res.status(200).json({ completedTask: user.task });
+    } catch (error) {
+        res.status(500).json({ error: "Algo mal" });
+    }
 });
 
 app.get("/tasks/complete/:date/:userId", async (req, res) => {
@@ -230,6 +318,7 @@ app.post("/users/:userId/lists/:listId/tasks", async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
+<<<<<<< HEAD:api/index.js
     const list = user.lists.id(listId);
     if (!list) {
       return res.status(404).json({ error: "Lista no encontrada" });
@@ -244,3 +333,35 @@ app.post("/users/:userId/lists/:listId/tasks", async (req, res) => {
     res.status(500).json({ error: "Algo salió mal" });
   }
 });
+=======
+app.post("/users/:userId/lists/:listId/tasks", async (req, res) => {
+    try {
+      const { userId, listId } = req.params;
+      const { title, description, completed } = req.body;
+  
+      // Crear una nueva tarea
+      const newTask = new Task({ title, description, completed });
+      await newTask.save();
+  
+      // Buscar el usuario y la lista específica
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+  
+      const list = user.lists.id(listId);
+      if (!list) {
+        return res.status(404).json({ error: "Lista no encontrada" });
+      }
+  
+      // Agregar la tarea a la lista
+      list.tasks.push(newTask._id);
+      await user.save();
+  
+      res.status(201).json(newTask);
+    } catch (error) {
+      res.status(500).json({ error: "Algo salió mal" });
+    }
+  });
+
+>>>>>>> 7e824f4fc507f604a945878205e0500c3292e60a:_mala/index.js

@@ -2,9 +2,29 @@ import { Stack } from "expo-router";
 import React from "react";
 
 export default function Layout() {
+<<<<<<< HEAD
   return (
     <Stack>
       <Stack.Screen name="index" options={{title:"Calendar"}}/>
     </Stack>
   );
 }
+=======
+    return (
+        <Stack >
+             <Stack.Screen
+                name="index"
+                options={{
+                    title: "Calendar",
+                    headerStyle: {
+                        height: 60, // Cambia esta altura según sea necesario
+                    },
+                    headerTitleStyle: {
+                        alignSelf: 'center', // Centra el título si es necesario
+                    },
+                }}
+            />
+        </Stack>
+    );
+}
+>>>>>>> 7e824f4fc507f604a945878205e0500c3292e60a

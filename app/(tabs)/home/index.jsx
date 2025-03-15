@@ -1,14 +1,28 @@
-import { Pressable, StyleSheet, Text, View, TextInput, ScrollView,Image} from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
-import { Ionicons } from '@expo/vector-icons';
-import { BottomModal, ModalContent, ModalTitle, SlideAnimation } from 'react-native-modals';
-import axios from 'axios';
-import moment from 'moment';
-import { Entypo } from '@expo/vector-icons';
-import { FontAwesome6 } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
-import { FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  ScrollView,
+  Image,
+} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import {
+  BottomModal,
+  ModalContent,
+  ModalTitle,
+  SlideAnimation,
+} from "react-native-modals";
+import axios from "axios";
+import moment from "moment";
+import { Entypo } from "@expo/vector-icons";
+import { FontAwesome6 } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const index = () => {
   const today = moment().format("DD MMM YY");
@@ -24,13 +38,15 @@ const index = () => {
     try {
       const taskData = {
         title: task,
-
-      }
-      axios.post(`http://192.168.1.159:3000/tasks/6632a41c67a60486f03cd3fc`, taskData).then((response) => {
-        console.log(response)
-      }).catch((error) => {
-        console.log("error", error)
-      });
+      };
+      const userId = await AsyncStorage.getItem("userId");
+      console.log(userId);
+      axios
+        .post(`http://192.168.1.159:3000/tasks/${userId}`, taskData)
+        .then((response) => {})
+        .catch((error) => {
+          console.log("error", error);
+        });
 
       await getUserTasks();
       setModalVisible(false);
@@ -38,7 +54,7 @@ const index = () => {
     } catch (error) {
       console.log("error", error);
     }
-  }
+  };
 
   useEffect(() => {
     if (isModalVisible) {
@@ -50,48 +66,68 @@ const index = () => {
 
   useEffect(() => {
     getUserTasks();
-  }, [marked,isModalVisible])
+  }, [marked, isModalVisible]);
   const getUserTasks = async () => {
     try {
-      const res = await axios.get(`http://192.168.1.159:3000/users/6632a41c67a60486f03cd3fc/tasks`)
-      console.log(res.data.tasks);
+      const userId = await AsyncStorage.getItem("userId");
+      const res = await axios.get(
+        `http://192.168.1.159:3000/users/${userId}/tasks`
+      );
+      console.log(userId);
       setTasks(res.data.tasks);
 
       const tasksListadas = res.data.tasks || [];
-      const pending = tasksListadas.filter((task) => task.status !== "completed");
+      const pending = tasksListadas.filter(
+        (task) => task.status !== "completed"
+      );
 
-      const completed = tasksListadas.filter((task) => task.status === "completed");
+      const completed = tasksListadas.filter(
+        (task) => task.status === "completed"
+      );
 
       setPendingTasks(pending);
       setCompletedTasks(completed);
     } catch (error) {
-      console.log("error", error)
+      console.log("error", error);
     }
   };
 
   const markTaskCompleted = async (taskId) => {
     try {
-        setMarked(true);
-        const response = await axios.patch(`http://192.168.1.159:3000/tasks/${taskId}/complete`);
-        console.log(response.data);
+      setMarked(true);
+      const response = await axios.patch(
+        `http://192.168.1.159:3000/tasks/${taskId}/complete`
+      );
+      console.log(response.data);
     } catch (error) {
-        console.log("Error marking task as completed:", error.response ? error.response.data : error.message);
+      console.log(
+        "Error marking task as completed:",
+        error.response ? error.response.data : error.message
+      );
     }
-};
-  const router =useRouter();
+  };
+  const router = useRouter();
 
-  console.log("completed", completedTasks);
-  console.log("pending", pendingTasks);
+  //console.log("completed", completedTasks);
+  //console.log("pending", pendingTasks);
   return (
     <>
-      <View style={{
-        marginHorizontal: 10,
-        marginVertical: 10,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12
-      }}
-      >{/*}
+      <View
+        style={{
+          marginHorizontal: 10,
+          marginVertical: 10,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        {/*}<Pressable style={styles.pressTask}  onPress={() => {
+        router?.push({
+          pathname: "/home/myDay",
+        });
+      }}/>
+        
+        {/*}
         <Pressable style={{
           backgroundColor: "#ff5733",
           paddingHorizontal: 12,
@@ -140,20 +176,28 @@ const index = () => {
               {pendingTasks?.length > 0 && <Text> Task!! {today}</Text>}
 
               {pendingTasks?.map((item, index) => (
-                <Pressable style={styles.pressTask}  onPress={() => {
-                  router?.push({
-                    pathname: "/home/info",
-                    params: {
-                      id: item._id,
-                      title: item?.title,
-                      category: item?.category,
-                      createdAt: item?.createdAt,
-                      dueDate: item?.dueDate,
-                    },
-                  });
-                }}>
+                <Pressable
+                  style={styles.pressTask}
+                  onPress={() => {
+                    router?.push({
+                      pathname: "/home/info",
+                      params: {
+                        id: item._id,
+                        title: item?.title,
+                        category: item?.category,
+                        createdAt: item?.createdAt,
+                        dueDate: item?.dueDate,
+                      },
+                    });
+                  }}
+                >
                   <View style={styles.viewTask}>
-                    <Entypo onPress={()=> markTaskCompleted(item?._id)} name="circle" size={18} color="black" />
+                    <Entypo
+                      onPress={() => markTaskCompleted(item?._id)}
+                      name="circle"
+                      size={18}
+                      color="black"
+                    />
                     <Text style={{ flex: 1 }}>{item?.title}</Text>
                     <FontAwesome6 name="bookmark" size={20} color="black" />
                   </View>
@@ -161,17 +205,28 @@ const index = () => {
               ))}
               {completedTasks?.length > 0 && (
                 <View>
-                  <View style={styles.viewCompletedTask}>
-                  </View>
+                  <View style={styles.viewCompletedTask}></View>
                   <View style={styles.viewCompletedTask2}>
                     <Text>Completed Task</Text>
-                    <MaterialIcons name="arrow-drop-down" size={24} color="black" />
+                    <MaterialIcons
+                      name="arrow-drop-down"
+                      size={24}
+                      color="black"
+                    />
                   </View>
                   {completedTasks?.map((item, index) => (
                     <Pressable style={styles.pressTask}>
                       <View style={styles.viewTask}>
                         <FontAwesome name="circle" size={18} color="black" />
-                        <Text style={{ flex: 1 ,textDecorationLine:"line-through", color:"gray"}}>{item?.title}</Text>
+                        <Text
+                          style={{
+                            flex: 1,
+                            textDecorationLine: "line-through",
+                            color: "gray",
+                          }}
+                        >
+                          {item?.title}
+                        </Text>
                         <FontAwesome6 name="bookmark" size={20} color="black" />
                       </View>
                     </Pressable>
@@ -187,21 +242,20 @@ const index = () => {
                   textAlign: "center",
                   color: "#ff5733",
                   marginTop: 30,
-                  fontSize: 17
+                  fontSize: 17,
                 }}
-              >Start with new tasks!</Text>
-
+              >
+                Start with new tasks!
+              </Text>
             </View>
           )}
-
         </View>
-
       </ScrollView>
-      <Pressable onPress={() =>
-        setModalVisible(!isModalVisible)}
+      <Pressable
+        onPress={() => setModalVisible(!isModalVisible)}
         style={{
           display: "flex",
-          flexDirection: 'row',
+          flexDirection: "row",
           height: 52,
           width: 390,
           backgroundColor: "#474b4e",
@@ -209,21 +263,21 @@ const index = () => {
           borderRadius: 6,
           marginLeft: "auto",
           marginRight: "auto",
-          marginBottom: 25
-        }}>
-        <Ionicons name="add" size={32} color="#e8e8e8" style={{
-
-        }} />
+          marginBottom: 25,
+        }}
+      >
+        <Ionicons name="add" size={32} color="#e8e8e8" style={{}} />
         <Text style={styles.bottomButtonText}>Add a task</Text>
       </Pressable>
-      <BottomModal onBackdropPress={() => setModalVisible(!isModalVisible)}
+      <BottomModal
+        onBackdropPress={() => setModalVisible(!isModalVisible)}
         onHardwareBackPress={() => setModalVisible(!isModalVisible)}
         swipeDirection={["up", "down"]}
         swipeThreshold={200}
-        modalTitle={<ModalTitle title='Add a task' />}
+        modalTitle={<ModalTitle title="Add a task" />}
         modalAnimation={
           new SlideAnimation({
-            slideFrom: "bottom"
+            slideFrom: "bottom",
           })
         }
         visible={isModalVisible}
@@ -231,12 +285,23 @@ const index = () => {
       >
         <ModalContent style={styles.modal}>
           <View style={styles.modalView}>
-            <TextInput ref={inputRef} placeholder='Enter a new task' style={styles.textInput} value={task} onChangeText={(text) => setTask(text)} />
-            <Ionicons onPress={addTask} name="send-sharp" size={24} color="#ff5733" style={{}} />
+            <TextInput
+              ref={inputRef}
+              placeholder="Enter a new task"
+              style={styles.textInput}
+              value={task}
+              onChangeText={(text) => setTask(text)}
+            />
+            <Ionicons
+              onPress={addTask}
+              name="send-sharp"
+              size={24}
+              color="#ff5733"
+              style={{}}
+            />
           </View>
         </ModalContent>
       </BottomModal>
-
     </>
   );
 };
@@ -246,7 +311,7 @@ export default index;
 const styles = StyleSheet.create({
   modal: {
     width: "100%",
-    height: 200
+    height: 200,
   },
 
   textInput: {
@@ -256,35 +321,33 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     flex: 1,
     color: "black",
-
   },
 
   bottomButtonText: {
     color: "#e8e8e8",
     marginLeft: 7,
     bottom: -5,
-    fontSize: 16
+    fontSize: 16,
   },
 
   modalView: {
     marginVertical: 10,
     flexDirection: "row",
     alignItems: "center",
-    gap: 10
+    gap: 10,
   },
 
   viewTask: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-
   },
 
   pressTask: {
     backgroundColor: "#E0E0E0",
     padding: 10,
     borderRadius: 7,
-    marginVertical: 10
+    marginVertical: 10,
   },
 
   viewCompletedTask: {
@@ -297,6 +360,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 5,
     marginHorizontal: 10,
-  }
-
-})
+  },
+});

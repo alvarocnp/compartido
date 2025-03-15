@@ -1,30 +1,32 @@
-const mongoose=require("mongoose");
-const userSchema=new mongoose.Schema({
-    name:{
-        type:String,
-        required:true,
+const mongoose = require("mongoose");
+const Task =require("./task");
+
+const userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
     },
 
-    email:{
-        type:String,
-        required:true,
-        unique:true,
+    email: {
+        type: String,
+        required: true,
+        unique: true,
     },
-    password:{
-        type:String,
-        required:true,
+    password: {
+        type: String,
+        required: true,
     },
 
-    task:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Task",
+    task: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
     }],
-    createdAt:{
-        type:Date,
-        default:Date.now,
+    createdAt: {
+        type: Date,
+        default: Date.now,
     },
-    
+
 })
 
-const User= mongoose.model("User",userSchema);
-module.exports=User;
+const User = mongoose.model("User", userSchema);
+module.exports = User;

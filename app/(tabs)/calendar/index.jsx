@@ -5,6 +5,7 @@ import moment from "moment"
 import axios from 'axios';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import  AsyncStorage from '@react-native-async-storage/async-storage'
 const index = () => {
   const today = moment().format("DD MM YYYY");
   const [selectedDate, setSelectDate] = useState(today);
@@ -12,7 +13,8 @@ const index = () => {
 
   const fetchCompletedTask = async () => {
     try {
-      const response = await axios.get(`http://192.168.1.159:3000/tasks/complete/${selectedDate}/6632a41c67a60486f03cd3fc`);
+      const userId = await AsyncStorage.getItem("userId");
+      const response = await axios.get(`http://192.168.1.159:3000/tasks/complete/${selectedDate}/${userId}`);
       const completedTasks = response.data.completedTask || [];
       setTask(completedTasks);
     } catch (error) {

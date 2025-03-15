@@ -1,27 +1,39 @@
-import { StyleSheet, Text, View ,Image} from 'react-native'
+import { StyleSheet, Text, View, Image, Pressable } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
-
+import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const index = () => {
-  const [completedTask,setCompletedTasks] = useState(0);
-  const [pendingTasks,setPendingTasks] = useState(0);
+  const [completedTask, setCompletedTasks] = useState(0);
+  const [pendingTasks, setPendingTasks] = useState(0);
+  const router = useRouter();
 
-  const fetchTaskData= async ()=>{
-    try{
-      const response= await axios.get(`http://192.168.1.159:3000/task/count`);
-      const {totalCompletedTask,totalPendingTask}=response.data;
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("authToken");
+      await AsyncStorage.removeItem("userId");
+      router.push("/login/login");
+    } catch (error) {
+      console.log("Error during logout:", error);
+    }
+  };
+  const fetchTaskData = async () => {
+    try {
+      const response = await axios.get(`http://192.168.1.159:3000/task/count`);
+      const { totalCompletedTask, totalPendingTask } = response.data;
       setCompletedTasks(totalCompletedTask);
       setPendingTasks(totalPendingTask);
 
-    }catch(error){
-      console.log("error",error)
+    } catch (error) {
+      console.log("error", error)
     }
   }
-  useEffect(()=>{
+  useEffect(() => {
     fetchTaskData()
-  },[]);
-  console.log("comp",completedTask)
-  console.log("pending",pendingTasks)
+  }, []);
+  console.log("comp", completedTask)
+  console.log("pending", pendingTasks)
   return (
     <View style={styles.view}>
       <View style={styles.view2}>
@@ -32,24 +44,30 @@ const index = () => {
             uri: "https://lh3.googleusercontent.com/ogw/ANLem4Zmk7fohWyH7kB6YArqFy0WMfXnFtuX3PX3LSBf=s64-c-mo",
           }}
         /> {*/}
-        <View> 
+        <View>
           <Text style={styles.text}>Selected categories</Text>
         </View>
       </View>
-      <View style={{marginVertical:12}}>
-          <Text>Overview</Text>
-          <View style={styles.viewTask}> 
-            <View style={styles.viewTask1}> 
-              <Text style={styles.textTask}>{completedTask}</Text>
-              <Text style={styles.textTask1}>Completed task</Text>
-            </View>
-
-            <View style={styles.viewTask1}> 
-              <Text style={styles.textTask}>{pendingTasks}</Text>
-              <Text style={styles.textTask1}>Pending task</Text>
-            </View>
+      <View style={{ marginVertical: 12 }}>
+        <Text>Overview</Text>
+        <View style={styles.viewTask}>
+          <View style={styles.viewTask1}>
+            <Text style={styles.textTask}>{completedTask}</Text>
+            <Text style={styles.textTask1}>Completed task</Text>
           </View>
+
+          <View style={styles.viewTask1}>
+            <Text style={styles.textTask}>{pendingTasks}</Text>
+            <Text style={styles.textTask1}>Pending task</Text>
+          </View>
+        </View>
       </View>
+      <Pressable>
+        <View style={styles.view3}>
+          <Feather name="log-out" size={24} color="red" onPress={handleLogout} />
+          <Text style={styles.textTask2}>Log out </Text>
+        </View>
+      </Pressable>
     </View>
   )
 }
@@ -58,43 +76,53 @@ export default index
 
 const styles = StyleSheet.create({
 
-  view:{
-    padding:10,
-    flex:1,
-    backgroundColor:"white"
-  },  
-  view2:{
-    flexDirection:"row",
-    alignItems:"center",
-    gap:10
+  view3:{
+    flexDirection: 'row',
+    marginVertical: 20,
   },
-  text:{
-    fontSize:15,
-    color:"gray",
-    marginTop:4,
+  view: {
+    padding: 10,
+    flex: 1,
+    backgroundColor: "white"
   },
-  viewTask:{
-    flexDirection:"row",
-    alignItems:"center",
-    gap:6,
-    marginVertical:8
+  view2: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10
   },
-  viewTask1:{
-    backgroundColor:"#ff5733",
-    padding:10,
-    borderRadius:8,
-    flex:1,
-    justifyContent:"center",
-    alignContent:"center",
+  text: {
+    fontSize: 15,
+    color: "gray",
+    marginTop: 4,
   },
-  textTask:{
-    textAlign:"center",
-    fontSize:16,
-    fontWeight:"bold"
+  viewTask: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginVertical: 8
   },
-  textTask1:{
-    textAlign:"center",
-    fontSize:16,
-  
-  }
+  viewTask1: {
+    backgroundColor: "#ff5733",
+    padding: 10,
+    borderRadius: 8,
+    flex: 1,
+    justifyContent: "center",
+    alignContent: "center",
+  },
+  textTask: {
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "bold"
+  },
+  textTask1: {
+    textAlign: "center",
+    fontSize: 16,
+
+  },
+  textTask2: {
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "bold",
+    color:"red"
+  },
 })
